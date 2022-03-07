@@ -34,7 +34,7 @@ public final class BungeeClansLoader extends Plugin {
 
         Configuration section = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "config.yml")).getSection("mongodb");
 
-        MongoDBProvider.getInstance().init(section.getString("uri"), section.getString("dbname"), section.getString("collection"));
+        MongoDBProvider.getInstance().init(section.getString("uri"), section.getString("dbname"), section.getString("collection"), this.getLogger());
 
         this.getProxy().getPluginManager().registerListener(this, new PostLoginListener());
 

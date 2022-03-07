@@ -14,18 +14,21 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Filter;
+import java.util.logging.Logger;
 
 public final class MongoDBProvider {
 
     @Getter private final static MongoDBProvider instance = new MongoDBProvider();
 
     private final Gson mapper = new Gson();
+    private Logger logger;
 
     private MongoCollection<Document> collection = null;
     private MongoCollection<Document> playersCollection = null;
 
-    public void init(String uri, String dbname, String collectionName) {
+    public void init(String uri, String dbname, String collectionName, Logger logger) {
+        this.logger = logger;
+
         MongoClient mongoClient;
 
         if (uri == null || uri.equals("")) {
@@ -41,6 +44,12 @@ public final class MongoDBProvider {
     }
 
     public void createOrSaveStorage(PluginClanStorage storage) throws IllegalAccessException {
+        if (this.collection == null) {
+            this.logger.warning("Collection 'clans' not initialized...");
+
+            return;
+        }
+
         Document document = new Document();
 
         for (Field field : storage.getClass().getDeclaredFields()) {
@@ -65,6 +74,12 @@ public final class MongoDBProvider {
     }
 
     public PluginClanStorage loadStorage(UUID uniqueId) {
+        if (this.collection == null) {
+            this.logger.warning("Collection 'clans' not initialized...");
+
+            return null;
+        }
+
         Document document = this.collection.find(Filters.eq("uniqueId", uniqueId.toString())).first();
 
         if (document == null) {
@@ -75,6 +90,12 @@ public final class MongoDBProvider {
     }
 
     public PluginClanStorage loadStorage(String name) {
+        if (this.collection == null) {
+            this.logger.warning("Collection 'clans' not initialized...");
+
+            return null;
+        }
+
         Document document = this.collection.find(Filters.eq("name", name)).first();
 
         if (document == null) {
@@ -97,6 +118,12 @@ public final class MongoDBProvider {
     }
 
     public void createOrSave(String name, UUID uniqueId, UUID clanUniqueId, List<String> pendingInvites) {
+        if (this.playersCollection == null) {
+            this.logger.warning("Collection 'players' not initialized...");
+
+            return;
+        }
+
         Document document = this.playersCollection.find(Filters.eq("uniqueId", uniqueId.toString())).first();
 
         if (document == null) {
@@ -115,6 +142,12 @@ public final class MongoDBProvider {
     }
 
     public PluginClanStorage getPlayerClan(UUID uniqueId) {
+        if (this.playersCollection == null) {
+            this.logger.warning("Collection 'players' not initialized...");
+
+            return null;
+        }
+
         Document document = this.playersCollection.find(Filters.eq("uniqueId", uniqueId.toString())).first();
 
         if (document == null) {
@@ -127,6 +160,12 @@ public final class MongoDBProvider {
     }
 
     public UUID getTargetPlayer(String name) {
+        if (this.playersCollection == null) {
+            this.logger.warning("Collection 'players' not initialized...");
+
+            return null;
+        }
+
         Document document = this.playersCollection.find(Filters.eq("name", name)).first();
 
         if (document == null) {
@@ -139,6 +178,12 @@ public final class MongoDBProvider {
     }
 
     public String getTargetPlayer(UUID uniqueId) {
+        if (this.playersCollection == null) {
+            this.logger.warning("Collection 'players' not initialized...");
+
+            return null;
+        }
+
         Document document = this.playersCollection.find(Filters.eq("uniqueId", uniqueId.toString())).first();
 
         if (document == null) {
@@ -150,6 +195,12 @@ public final class MongoDBProvider {
 
     @SuppressWarnings("unchecked")
     public List<String> getTargetPendingInvites(UUID uniqueId) {
+        if (this.playersCollection == null) {
+            this.logger.warning("Collection 'players' not initialized...");
+
+            return new ArrayList<>();
+        }
+
         Document document = this.playersCollection.find(Filters.eq("uniqueId", uniqueId.toString())).first();
 
         if (document == null) {
