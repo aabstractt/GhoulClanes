@@ -19,5 +19,5 @@ public abstract class Argument {
         return this.name.equalsIgnoreCase(name) || (this.aliases != null && Arrays.stream(this.aliases).anyMatch(alias -> alias.equalsIgnoreCase(name)));
     }
 
-    public abstract void execute(ProxiedPlayer proxiedPlayer, String commandLabel, String argumentLabel, String[] args);
+    public abstract void execute(ProxiedPlayer proxiedPlayer, String commandLabel, String argumentLabel, String[] args) throws Exception;
 }

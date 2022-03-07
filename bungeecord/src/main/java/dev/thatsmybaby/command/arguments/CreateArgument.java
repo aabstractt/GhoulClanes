@@ -16,23 +16,30 @@ public final class CreateArgument extends Argument {
     }
 
     @Override
-    public void execute(ProxiedPlayer proxiedPlayer, String commandLabel, String argumentLabel, String[] args) {
+    public void execute(ProxiedPlayer proxiedPlayer, String commandLabel, String argumentLabel, String[] args) throws Exception {
+        MongoDBProvider provider = MongoDBProvider.getInstance();
+
         if (args.length == 0) {
             proxiedPlayer.sendMessage(new ComponentBuilder("Usage: /clan create <name>").color(ChatColor.RED).create());
 
             return;
         }
 
-        if (MongoDBProvider.getInstance().loadStorage(args[0]) != null) {
+        if (provider.getPlayerClan(proxiedPlayer.getUniqueId()) != null) {
+            proxiedPlayer.sendMessage(new ComponentBuilder("You already in clan!").create());
+
+            return;
+        }
+
+        if (provider.loadStorage(args[0]) != null) {
             proxiedPlayer.sendMessage(new ComponentBuilder(String.format("Clan %s already exists!", args[0])).color(ChatColor.RED).create());
 
             return;
         }
 
-        try {
-            MongoDBProvider.getInstance().saveOrCreateStorage(new PluginClanStorage(args[0], proxiedPlayer.getUniqueId().toString(), UUID.randomUUID().toString(), 0));
-        } catch (IllegalAccessException e) {
-            proxiedPlayer.sendMessage(new ComponentBuilder("An error occurred").color(ChatColor.RED).create());
-        }
+        UUID uniqueId = UUID.randomUUID();
+
+        provider.createOrSaveStorage(new PluginClanStorage(args[0], proxiedPlayer.getUniqueId().toString(), uniqueId.toString(), 0));
+        provider.createOrSave(proxiedPlayer.getUniqueId(), uniqueId);
     }
 }

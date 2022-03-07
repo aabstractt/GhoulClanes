@@ -18,6 +18,7 @@ public final class PluginClanStorage {
     @Getter private int points;
 
     @Getter private final Set<String> membersUniqueId = new HashSet<>();
+    @Getter private final Set<String> pendingInvitesSent = new HashSet<>();
 
     public void increasePoints(int increase) {
         this.points += increase;

@@ -13,7 +13,7 @@ public final class BungeeTester {
         Logger logger = BungeeClansLoader.getInstance().getLogger();
 
         UUID uniqueId = UUID.randomUUID();
-        MongoDBProvider.getInstance().saveOrCreateStorage(new PluginClanStorage(uniqueId.toString(), "hola"));
+        MongoDBProvider.getInstance().createOrSaveStorage(new PluginClanStorage("hola", "owner", uniqueId.toString(), 0));
         logger.warning("Saving or creating a new storage");
 
         PluginClanStorage storage = MongoDBProvider.getInstance().loadStorage(uniqueId);

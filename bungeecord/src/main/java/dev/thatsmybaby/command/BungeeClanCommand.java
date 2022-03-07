@@ -2,6 +2,7 @@ package dev.thatsmybaby.command;
 
 import dev.thatsmybaby.BungeeClansLoader;
 import dev.thatsmybaby.command.arguments.CreateArgument;
+import dev.thatsmybaby.command.arguments.InviteArgument;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -20,7 +21,10 @@ public final class BungeeClanCommand extends Command {
     public BungeeClanCommand(String name) {
         super(name);
 
-        addArguments(new CreateArgument("create", null, null, true));
+        addArguments(
+                new CreateArgument("create", null, null, true),
+                new InviteArgument("invite", null, null, true)
+        );
     }
 
     private void addArguments(Argument... arguments) {
@@ -59,13 +63,25 @@ public final class BungeeClanCommand extends Command {
             return;
         }
 
+        String[] finalArgs = Arrays.copyOfRange(args, 1, args.length);
+
         if (argument.isAsync()) {
-            ProxyServer.getInstance().getScheduler().runAsync(BungeeClansLoader.getInstance(), () -> argument.execute((ProxiedPlayer) sender, this.getName(), args[0], args));
+            ProxyServer.getInstance().getScheduler().runAsync(BungeeClansLoader.getInstance(), () -> {
+                try {
+                    argument.execute((ProxiedPlayer) sender, this.getName(), args[0], finalArgs);
+                } catch (Exception e) {
+                    sender.sendMessage(new ComponentBuilder("An error occurred").color(ChatColor.RED).create());
+                }
+            });
 
             return;
         }
 
-        argument.execute((ProxiedPlayer) sender, this.getName(), args[0], args);
+        try {
+            argument.execute((ProxiedPlayer) sender, this.getName(), args[0], finalArgs);
+        } catch (Exception e) {
+            sender.sendMessage(new ComponentBuilder("An error occurred").color(ChatColor.RED).create());
+        }
     }
 
     private void showHelpMessage(ProxiedPlayer proxiedPlayer) {

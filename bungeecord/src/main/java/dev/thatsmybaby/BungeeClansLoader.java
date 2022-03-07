@@ -2,8 +2,10 @@ package dev.thatsmybaby;
 
 import com.google.common.io.ByteStreams;
 import dev.thatsmybaby.command.BungeeClanCommand;
+import dev.thatsmybaby.listener.PostLoginListener;
 import dev.thatsmybaby.shared.MongoDBProvider;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -16,9 +18,10 @@ import java.io.OutputStream;
 
 public final class BungeeClansLoader extends Plugin {
 
-    @Getter private static BungeeClansLoader instance;
+    @Getter
+    private static BungeeClansLoader instance;
 
-    @Override @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Override @SuppressWarnings("ResultOfMethodCallIgnored") @SneakyThrows
     public void onEnable() {
         instance = this;
 
@@ -29,15 +32,13 @@ public final class BungeeClansLoader extends Plugin {
         this.saveResource("config.yml");
         this.saveResource("messages.yml");
 
-        try {
-            Configuration section = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "config.yml")).getSection("mongodb");
+        Configuration section = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "config.yml")).getSection("mongodb");
 
-            MongoDBProvider.getInstance().init(section.getString("uri"), section.getString("dbname"), section.getString("collection"));
+        MongoDBProvider.getInstance().init(section.getString("uri"), section.getString("dbname"), section.getString("collection"));
 
-            this.getProxy().getPluginManager().registerCommand(this, new BungeeClanCommand("clan"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.getProxy().getPluginManager().registerListener(this, new PostLoginListener());
+
+        this.getProxy().getPluginManager().registerCommand(this, new BungeeClanCommand("clan"));
     }
 
     @SuppressWarnings({"UnstableApiUsage", "ResultOfMethodCallIgnored"})
